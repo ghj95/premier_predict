@@ -20,7 +20,7 @@ def appinfo():
         st.write("Notre application s'appuie sur un modèle de classification **Extreme Gradient Boosting (XGBoost)** entraîné sur une décennie de résultats historiques (2015-2025). Les prédictions intègrent la *forme récente des équipes*, l'*analyse statistique des matchs précédents* et l'*historique des confrontations directes* entre les clubs.")
         st.write('Les prédictions du modèle ne sont pas des certitudes.')
 
-st.sidebar.header('Select Teams')
+st.sidebar.header('Détails du match')
 def input_features():
     domicile = st.sidebar.selectbox('Équipe à domicile :', (equipes), index=None, placeholder='Séléctionez une équipe...')
     exterieur = st.sidebar.selectbox("Équipe à l'extérieur :", (equipes), index=None, placeholder='Séléctionez une équipe...')
@@ -49,6 +49,6 @@ if st.sidebar.button('Prédire'):
             prediction = predire_matchs(domicile, exterieur, match_date)
 
 if prediction == 0:
-    st.success(f'Le modèle prédit une victoire de **{exterieur}** !', icon='🎉')
+    st.success(f'Le modèle prédit une victoire de **{exterieur}** !', icon='🎯')
 elif prediction == 1:
-    st.success(f'Le modèle prédit une victoire de **{domicile}** !', icon='🎉')
+    st.success(f'Le modèle prédit une victoire de **{domicile}** !', icon='🎯')
