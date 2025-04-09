@@ -1,3 +1,8 @@
+# Important à lire!!
+# Le fichier présent comporte uniquement des fonctions qui ont déjà été crées et entièrement expliquées au sein du jupyter notebook epl_predictor.ipynb, ce qui explique son absence de commentaires
+# Il sert uniquement à recopier les fonctions au sein d'un fichier .py dans le but de les rendre disponibles pour l'application Streamlit contenue dans le fichier app.py
+# Une explication étendue de l'entièreté du fichier présent avec des commentaires ajoutés est disponible dans le jupyter notebook epl_predictor.ipynb 
+
 import pandas as pd
 import pickle
 
@@ -206,7 +211,7 @@ def predire_matchs(domicile, exterieur, date):
         new_row['AnneeSaison'] = date.year - 1
     else:
         new_row['AnneeSaison'] = date.year
-    new_row['SemaineSaison'] = (matchs.apply(lambda x: (x['Date'] - pd.Timestamp(year=x['AnneeSaison'], month=8, day=5)).days, axis=1)) // 7 + 1
+    new_row['SemaineSaison'] = int(((pd.Timestamp(date) - pd.Timestamp(year=int(new_row['AnneeSaison']), month=8, day=5)).days // 7) + 1)
     
     matchs.loc[len(predire_df)] = new_row
 
