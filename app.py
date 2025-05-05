@@ -12,7 +12,7 @@ st.set_page_config(page_title='PremierPredict', page_icon='⚽️', layout='wide
 st.markdown('## ⚽️ PremierPredict : *Prédictions des matchs de la Premier League*')
 url = 'https://ghj95.github.io/portfolio//'
 st.markdown(
-    f"<a href='{url}' target='_blank' style='text-decoration: none; color: inherit;'>`Par : Gabriel Hardy-Joseph, Karim Ghandour, Louis-Matteo Creplet et Mohamed-Aziz Charfeddine`</a>",
+    f"<a href='{url}' target='_blank' style='text-decoration: none; color: inherit;'>`Par : Gabriel Hardy-Joseph`</a>",
     unsafe_allow_html=True,
 )
 st.markdown(
