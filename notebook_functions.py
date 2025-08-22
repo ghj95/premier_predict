@@ -1,4 +1,3 @@
-# Important à lire!!
 # Le fichier présent comporte uniquement des fonctions qui ont déjà été crées et entièrement expliquées au sein du jupyter notebook epl_predictor.ipynb, ce qui explique son absence de commentaires
 # Il sert uniquement à recopier les fonctions au sein d'un fichier .py dans le but de les rendre disponibles pour l'application Streamlit contenue dans le fichier app.py
 # Une explication étendue de l'entièreté du fichier présent avec des commentaires ajoutés est disponible dans le jupyter notebook epl_predictor.ipynb 
@@ -6,6 +5,9 @@
 import xgboost as xgb
 import pandas as pd
 import pickle
+
+with open('xgb_model.pkl', 'rb') as file:
+    xgb_model = pickle.load(file)
 
 matchs = pd.read_csv('epl_2000-2025.csv')
 
@@ -99,7 +101,7 @@ def stats_equipe(matchs):
             elif match_prec['ExterieurCode'] == equipe_exterieur and match_prec['Cible'] == 0:
                 points_exterieur += 3
             else:
-                points_domicile += 1
+                points_exterieur += 1
     
         matchs.at[i, 'DomicileForme'] = points_domicile
         matchs.at[i, 'ExterieurForme'] = points_exterieur    
@@ -163,8 +165,7 @@ def faf_equipes(matchs):
         
         victoires_exterieur_a_dom = sum(cas2['Cible'] == 1) 
         victoires_domicile_a_ext = sum(cas2['Cible'] == 0)  
-        nul_dom_a_ext = sum(cas1['Cible'] == 2)             
-
+        nul_dom_a_ext = sum(cas2['Cible'] == 2)  
         
         matchs.at[i, 'FAF_VictoiresDomicile_Dom'] = victoires_domicile_a_dom        
         matchs.at[i, 'FAF_VictoiresDomicile_Ext'] = victoires_domicile_a_ext        
@@ -177,9 +178,6 @@ def faf_equipes(matchs):
         matchs['FAF_DiffGlobal'] = (matchs['FAF_VictoiresDomicile_Dom'] - matchs['FAF_VictoiresExterieur_Ext']) + (matchs['FAF_VictoiresDomicile_Ext'] - matchs['FAF_VictoiresExterieur_Dom'])
         matchs['FAF_DiffNul'] = matchs['FAF_Nul_Domicile_Dom'] - matchs['FAF_Nul_Domicile_Ext']
     return matchs
-
-with open('xgb_model.pkl', 'rb') as file:
-    xgb_model = pickle.load(file)
 
 def predire_matchs(domicile, exterieur, date):
 
@@ -204,24 +202,17 @@ def predire_matchs(domicile, exterieur, date):
             new_row[col] = 0.0
     
     date = pd.to_datetime(date)
-
     new_row['Date'] = date
 
     if domicile not in code_equipe:
-        print(f"ERREUR: L'équipe '{domicile}' n'existe pas dans le dictionnaire.")
-        print(f"Équipes disponibles: {list(code_equipe.keys())}")
-        return None
+        raise ValueError(f"L'équipe '{domicile}' n'existe pas dans le dictionnaire. Équipes disponibles: {list(code_equipe.keys())}")
     
     if exterieur not in code_equipe:
-        print(f"ERREUR: L'équipe '{exterieur}' n'existe pas dans le dictionnaire.")
-        print(f"Équipes disponibles: {list(code_equipe.keys())}")
-        return None
+        raise ValueError(f"L'équipe '{exterieur}' n'existe pas dans le dictionnaire. Équipes disponibles: {list(code_equipe.keys())}")
     
-    new_row['DomicileCode'] = code_equipe.get(domicile)
-    new_row['ExterieurCode'] = code_equipe.get(exterieur)
-    new_row['DomicileCode'] = int(new_row['DomicileCode'])
-    new_row['ExterieurCode'] = int(new_row['ExterieurCode'])
-    new_row['Mois'] = (date.month)
+    new_row['DomicileCode'] = int(code_equipe.get(domicile))
+    new_row['ExterieurCode'] = int(code_equipe.get(exterieur))
+    new_row['Mois'] = date.month
 
     if date > pd.Timestamp(date.year, month=8, day=5):
         new_row['AnneeSaison'] = int(date.year - 1)
@@ -232,7 +223,6 @@ def predire_matchs(domicile, exterieur, date):
     
     predire_df.loc[len(predire_df)] = new_row
 
-
     stats_df = stats_equipe(predire_df)
     predire_df = faf_equipes(stats_df)
 
@@ -242,10 +232,7 @@ def predire_matchs(domicile, exterieur, date):
         if X_pred[col].dtype == 'object':
             X_pred[col] = pd.to_numeric(X_pred[col])
 
-    with open('xgb_model.pkl', 'rb') as file:
-        best_xgb = pickle.load(file)
+    prediction = xgb_model.predict(X_pred)
+    prob = xgb_model.predict_proba(X_pred)
 
-    prediction = best_xgb.predict(X_pred)
-    prob = best_xgb.predict_proba(X_pred)
-
-    return prediction, prob
+    return prediction[0], prob
