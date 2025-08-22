@@ -182,43 +182,74 @@ with open('xgb_model.pkl', 'rb') as file:
 
 def predire_matchs(domicile, exterieur, date):
 
-    predire_df = matchs.copy()
-
     features = [
-        'DomicileCode', 'ExterieurCode', 'DomicileForme', 'ExterieurForme', 
-        'DiffForme', 'FAF_VictoiresDomicile_Dom', 'FAF_Diff', 'FAF_DiffGlobal', 
-        'FAF_VictoiresExterieur_Dom', 'FAF_VictoiresDomicile_Ext', 
-        'FAF_VictoiresExterieur_Ext', 'SemaineSaison', 'Mois', 'AnneeSaison',
-        'DomicileAvgButsMarques_Home', 'DomicileAvgButsEncaisses_Home', 
-        'DomicileAvgButsMarques_Away', 'DomicileAvgButsEncaisses_Away', 
-        'ExterieurAvgButsMarques_Home', 'ExterieurAvgButsEncaisses_Home', 
-        'ExterieurAvgButsMarques_Away', 'ExterieurAvgButsEncaisses_Away', 
-        'DiffButsDomicile', 'DiffButsExterieur', 'DiffButs', 'DiffButsGlobal',
-        'FAF_Nul_Domicile_Dom', 'FAF_Nul_Domicile_Ext', 'FAF_DiffNul' 
-    ]
-
+    'DomicileCode', 'ExterieurCode', 'DomicileForme', 'ExterieurForme', 
+    'DiffForme', 'FAF_VictoiresDomicile_Dom', 'FAF_Diff', 'FAF_DiffGlobal', 
+    'FAF_VictoiresExterieur_Dom', 'FAF_VictoiresDomicile_Ext', 
+    'FAF_VictoiresExterieur_Ext', 'SemaineSaison', 'Mois', 'AnneeSaison',
+    'DomicileAvgButsMarques_Home', 'DomicileAvgButsEncaisses_Home', 
+    'DomicileAvgButsMarques_Away', 'DomicileAvgButsEncaisses_Away', 
+    'ExterieurAvgButsMarques_Home', 'ExterieurAvgButsEncaisses_Home', 
+    'ExterieurAvgButsMarques_Away', 'ExterieurAvgButsEncaisses_Away', 
+    'DiffButsDomicile', 'DiffButsExterieur', 'DiffButs', 'DiffButsGlobal',
+    'FAF_Nul_Domicile_Dom', 'FAF_Nul_Domicile_Ext', 'FAF_DiffNul' 
+]
+    date_limite = pd.to_datetime(date) - pd.DateOffset(years=2)
+    predire_df = matchs[matchs['Date'] >= date_limite].copy().reset_index(drop=True)
+    
     new_row = {}
     for col in features:
         if col in predire_df.columns:
-            new_row[col] = 0
-
+            new_row[col] = 0.0
+    
     date = pd.to_datetime(date)
+
     new_row['Date'] = date
+
+    if domicile not in code_equipe:
+        print(f"ERREUR: L'équipe '{domicile}' n'existe pas dans le dictionnaire.")
+        print(f"Équipes disponibles: {list(code_equipe.keys())}")
+        return None
+    
+    if exterieur not in code_equipe:
+        print(f"ERREUR: L'équipe '{exterieur}' n'existe pas dans le dictionnaire.")
+        print(f"Équipes disponibles: {list(code_equipe.keys())}")
+        return None
+    
     new_row['DomicileCode'] = code_equipe.get(domicile)
     new_row['ExterieurCode'] = code_equipe.get(exterieur)
-    new_row['Mois'] = date.month
+    new_row['DomicileCode'] = int(new_row['DomicileCode'])
+    new_row['ExterieurCode'] = int(new_row['ExterieurCode'])
+    new_row['Mois'] = (date.month)
+
     if date > pd.Timestamp(date.year, month=8, day=5):
-        new_row['AnneeSaison'] = date.year - 1
+        new_row['AnneeSaison'] = int(date.year - 1)
     else:
-        new_row['AnneeSaison'] = date.year
+        new_row['AnneeSaison'] = int(date.year)
+
     new_row['SemaineSaison'] = int(((pd.Timestamp(date) - pd.Timestamp(year=int(new_row['AnneeSaison']), month=8, day=5)).days // 7) + 1)
     
-    matchs.loc[len(predire_df)] = new_row
+    predire_df.loc[len(predire_df)] = new_row
+
 
     stats_df = stats_equipe(predire_df)
     predire_df = faf_equipes(stats_df)
-    X_pred = predire_df.iloc[-1:][features]
-    y_pred = xgb_model.predict(X_pred)
-    y_pred_prob = xgb_model.predict_proba(X_pred)
 
-    return y_pred, y_pred_prob
+    X_pred = predire_df.iloc[-1:][features]
+    
+    for col in X_pred.columns:
+        if X_pred[col].dtype == 'object':
+            X_pred[col] = pd.to_numeric(X_pred[col])
+
+    with open('xgb_model.pkl', 'rb') as file:
+        best_xgb = pickle.load(file)
+
+    y_pred = best_xgb.predict(X_pred)
+    y_pred_prob = best_xgb.predict_proba(X_pred)
+    if y_pred == 0:
+        prediction = print(f"Le modèle prédit une victoire de {exterieur} à {y_pred_prob[0, 0]:.0%}!")
+    elif y_pred==1:
+        prediction = print(f"Le modèle prédit une victoire de {domicile} à {y_pred_prob[0, 1]:.0%}!")
+    else:
+        prediction = print(f"Le modèle prédit un match nul à {y_pred_prob[0, 2]:.0%}!")
+    return prediction

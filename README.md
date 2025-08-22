@@ -48,9 +48,6 @@ Le modèle XGBoost atteint une précision d'environ 48% sur l'ensemble de test, 
 
 Projet réalisé dans le cadre du cours TECH20704 par :
 - Gabriel Hardy-Joseph
-- Louis-Matteo Creplet
-- Mohamed-Aziz Charfeddine
-- Karim Ghandour
 
 ## Limitations
 
