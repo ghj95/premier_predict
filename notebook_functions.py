@@ -3,6 +3,7 @@
 # Il sert uniquement à recopier les fonctions au sein d'un fichier .py dans le but de les rendre disponibles pour l'application Streamlit contenue dans le fichier app.py
 # Une explication étendue de l'entièreté du fichier présent avec des commentaires ajoutés est disponible dans le jupyter notebook epl_predictor.ipynb 
 
+import xgboost as xgb
 import pandas as pd
 import pickle
 
@@ -244,12 +245,7 @@ def predire_matchs(domicile, exterieur, date):
     with open('xgb_model.pkl', 'rb') as file:
         best_xgb = pickle.load(file)
 
-    y_pred = best_xgb.predict(X_pred)
-    y_pred_prob = best_xgb.predict_proba(X_pred)
-    if y_pred == 0:
-        prediction = print(f"Le modèle prédit une victoire de {exterieur} à {y_pred_prob[0, 0]:.0%}!")
-    elif y_pred==1:
-        prediction = print(f"Le modèle prédit une victoire de {domicile} à {y_pred_prob[0, 1]:.0%}!")
-    else:
-        prediction = print(f"Le modèle prédit un match nul à {y_pred_prob[0, 2]:.0%}!")
-    return prediction
+    prediction = best_xgb.predict(X_pred)
+    prob = best_xgb.predict_proba(X_pred)
+
+    return prediction, prob

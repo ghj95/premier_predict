@@ -15,10 +15,6 @@ st.markdown(
     f"<a href='{url}' target='_blank' style='text-decoration: none; color: inherit;'>`Par : Gabriel Hardy-Joseph`</a>",
     unsafe_allow_html=True,
 )
-st.markdown(
-    "<span style='text-decoration: none;'><code style='color: inherit;'>Projet réalisé dans le cadre du cours TECH20704</code></span>",
-    unsafe_allow_html=True,
-)
 
 # définition d'une fonction pour afficher les informations sur le fonctionnement de l'application
 def appinfo():
@@ -86,7 +82,7 @@ if st.sidebar.button('Prédire'):
         st.success(f'Le modèle prédit une victoire de **{exterieur}** à **{prob[0, 0]:.0%}**!', icon='🎯')
     elif prediction == 1:
         # cas d'une victoire prédite pour l'équipe à domicile
-        st.success(f'Le modèle prédit une victoire de **{domicile}** **{prob[0, 1]:.0%}**!', icon='🎯')
+        st.success(f'Le modèle prédit une victoire de **{domicile}** à **{prob[0, 1]:.0%}**!', icon='🎯')
     else:
         # cas d'un match nul prédit
         st.success(f'Le modèle prédit un match nul à **{prob[0, 2]:.0%}**!', icon='🎯')
