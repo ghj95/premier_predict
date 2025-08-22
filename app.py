@@ -23,7 +23,7 @@ def appinfo():
         st.write("Cette application s'appuie sur un modèle de classification **Extreme Gradient Boosting (XGBoost)** entraîné sur 25 ans de résultats historiques (2000-2025). Les prédictions intègrent la *forme récente des équipes*, l'*analyse statistique des matchs précédents* et l'*historique des confrontations directes* entre les clubs. Essayez-la!")
     # second conteneur avec un avertissement sur la fiabilité des prédictions
     with st.container(border=True):
-        st.write('Les prédictions du modèle ne sont pas des certitudes.')
+        st.write("L'exécution pourrait prendre jusqu'à 30 secondes, les prédictions du modèle ne sont pas des certitudes.")
 
 # ajout d'un titre dans la barre latérale pour les informations à saisir avec la méthode st.sidebar
 st.sidebar.header('Détails du match')
@@ -70,7 +70,7 @@ if st.sidebar.button('Prédire'):
         valid_input = False
     
     # si toutes les vérifications sont passées avec succès, on effectue la prédiction
-    if valid_input:
+    if valid_input == True:
         # affichage d'un indicateur de chargement pendant le calcul de la prédiction avec la méthode st.spinner
         with st.spinner('Chargement des prédictions...'):
             # appel de la fonction de prédiction avec les paramètres fournis par l'utilisateur
