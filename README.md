@@ -44,11 +44,6 @@ Nous avons déployé le modèle prédictif que nous avons conçu au terme du pro
 
 Le modèle XGBoost atteint une précision d'environ 48% sur l'ensemble de test, ce qui est significativement supérieur au hasard (33% pour un problème à trois classes).
 
-## Contexte académique
-
-Projet réalisé dans le cadre du cours TECH20704 par :
-- Gabriel Hardy-Joseph
-
 ## Limitations
 
 - Les prédictions sont basées sur des données historiques et ne peuvent pas prendre en compte tous les facteurs imprévisibles (blessures de dernière minute, conditions météorologiques, etc.)
